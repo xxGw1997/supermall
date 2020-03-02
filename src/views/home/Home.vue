@@ -6,8 +6,8 @@
    <home-swiper :banners="banners"/>
    <recommend-view :recommends="recommends"/>
    <feature-view/>
-   <tab-control :class="tab-control" :title="['流行','新款','精选']"/>
-   <good-list :goods="goods['pop'].list"/>
+   <tab-control :class="tab-control" :title="['流行','新款','精选']" @tabClick="tabClick"/>
+   <good-list :goods="showGoods"/>
  </div>
 </template>
 
@@ -48,6 +48,11 @@
       Scroll,
       BackTop
    },
+   computed:{
+     showGoods(){
+       return this.goods[this.currentType].list
+     }
+   },
    created(){
      this.getHomeMultidata()
 
@@ -56,6 +61,29 @@
      this.getHomeGoods('sell')
    },
    methods:{
+     /**
+      * 事件监听
+      */
+     tabClick(index){
+       switch (index){
+         case 0:
+          this.currentType = 'pop'
+          break
+         case 1:
+          this.currentType = 'new'
+          break
+         case 2:
+          this.currentType = 'sell'
+          break
+         default:
+          this.currentType = 'pop'
+          break
+       }
+     },
+
+     /**
+      * 网络请求
+      */
      getHomeMultidata(){
        getHomeMultidata().then(res=>{
         this.banners = res.data.banner.list
@@ -68,7 +96,8 @@
          this.goods[type].list.push(...(res.data.list))
          this.goods[type].page+=1
       })
-     }
+     },
+
    }
  }
 </script>
