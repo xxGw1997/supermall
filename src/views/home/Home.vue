@@ -3,11 +3,18 @@
    <nav-bar class="home-nav">
      <div slot="center">购物街</div>
    </nav-bar>
-   <home-swiper :banners="banners"/>
-   <recommend-view :recommends="recommends"/>
-   <feature-view/>
-   <tab-control :class="tab-control" :title="['流行','新款','精选']" @tabClick="tabClick"/>
-   <good-list :goods="showGoods"/>
+   <scroll class="content" ref="scroll"
+           :probe-type="3"
+           @scroll="contentScroll"
+           :pull-up-load="true"
+           @pullingUp="loadMore">
+    <home-swiper :banners="banners"/>
+    <recommend-view :recommends="recommends"/>
+    <feature-view/>
+    <tab-control :class="tab-control" :title="['流行','新款','精选']" @tabClick="tabClick"/>
+    <good-list :goods="showGoods"/>
+   </scroll>
+   <back-top @click.native="backTop" v-show="isShowBackTop"/>
  </div>
 </template>
 
@@ -80,6 +87,15 @@
           break
        }
      },
+     backTop(){
+       this.$refs.scroll.scrollTo(0,0)
+     },
+     contentScroll(position){
+       this.isShowBackTop = -(position.y) > 1000
+     },
+     loadMore(){
+       this.getHomeGoods(this.currentType)
+     },
 
      /**
       * 网络请求
@@ -95,6 +111,7 @@
        getHomeGoods(type,page).then(res=>{
          this.goods[type].list.push(...(res.data.list))
          this.goods[type].page+=1
+         this.$refs.scroll.finishPullUp()
       })
      },
 
@@ -123,6 +140,15 @@
     position: sticky;
     top:44px;
     z-index: 9;
+  }
+
+  .content {
+    overflow: hidden;
+    position: absolute;
+    top: 44px;
+    bottom: 49px;
+    left: 0;
+    right: 0;
   }
  
 </style>
