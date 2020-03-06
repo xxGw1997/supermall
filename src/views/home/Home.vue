@@ -51,7 +51,8 @@
         isShowBackTop: false,
         tabOffsetTop:0,
         isTabFixed:false,
-        saveY:0
+        saveY:0,
+        itemImgListener:null
      }
    },
    components: {
@@ -79,9 +80,10 @@
    mounted(){
      //监听item图片加载完成
      const refresh = debounce(this.$refs.scroll.refresh(),100)
-     this.$bus.$on('itemImageLoad',()=>{
+     this.itemImgListener = ()=>{
        refresh()
-     })
+     }
+     this.$bus.$on('itemImageLoad',itemImgListener)
 
    },
    activated(){
@@ -89,7 +91,10 @@
      this.$refs.scroll.refresh()
    },
    deactivated(){
+     //1.保存离开前节点
      this.saveY = this.$refs.scroll.getY()
+     //2.取消全局事件监听
+     this.$bus.$off('itemImgLoad',itemImgListener)
    },
    methods:{
      /**
